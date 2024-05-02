@@ -24,5 +24,3 @@ class Media:
     def getAvgRating(self):
         return self.avg_rating
     
-    # idk str is needed
-    # def __str__(self):
