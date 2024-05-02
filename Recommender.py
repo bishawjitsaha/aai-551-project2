@@ -69,19 +69,19 @@ class Recommender:
                 
 
     def getMovieList(self):
-        movieList = [{'id': movie.getID(), 'title': movie.getTitle(), 'runtime': movie.getDuration()} for movie in self.show_dict.values() if movie.getType() == 'Movie']
+        movieList = [{'title': movie.getTitle(), 'runtime': movie.getDuration()} for movie in self.show_dict.values() if movie.getType() == 'Movie']
         longest_title_length = max(len(movie['title']) for movie in movieList)
         # print(longest_title_length, movieList)
         return longest_title_length, movieList
 
     def getTVList(self):
-        movieList = [{'id': movie.getID(), 'title': movie.getTitle(), 'runtime': movie.getDuration()} for movie in self.show_dict.values() if movie.getType() == 'TV Show']
+        movieList = [{'title': movie.getTitle(), 'runtime': movie.getDuration()} for movie in self.show_dict.values() if movie.getType() == 'TV Show']
         longest_title_length = max(len(movie['title']) for movie in movieList)
         # print(longest_title_length, movieList)
         return longest_title_length, movieList
 
     def getBookList(self):
-        bookList = [{'id': book.getID(), 'title': book.getTitle(), 'authors': ', '.join(book.getAuthors())} for book in self.book_dict.values() if book.getTitle() != 'title']
+        bookList = [{'title': book.getTitle(), 'authors': ', '.join(book.getAuthors())} for book in self.book_dict.values() if book.getTitle() != 'title']
         longest_title_length = max(len(book['title']) for book in bookList)
         # print(longest_title_length, bookList)
         return longest_title_length, bookList
