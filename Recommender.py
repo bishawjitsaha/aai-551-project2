@@ -75,10 +75,10 @@ class Recommender:
         return longest_title_length, movieList
 
     def getTVList(self):
-        movieList = [{'title': movie.getTitle(), 'runtime': movie.getDuration()} for movie in self.show_dict.values() if movie.getType() == 'TV Show']
-        longest_title_length = max(len(movie['title']) for movie in movieList)
+        tvShowList = [{'title': tvShow.getTitle(), 'seasons': tvShow.getDuration()} for tvShow in self.show_dict.values() if tvShow.getType() == 'TV Show']
+        longest_title_length = max(len(tvShow['title']) for tvShow in tvShowList)
         # print(longest_title_length, movieList)
-        return longest_title_length, movieList
+        return longest_title_length, tvShowList
 
     def getBookList(self):
         bookList = [{'title': book.getTitle(), 'authors': ', '.join(book.getAuthors())} for book in self.book_dict.values() if book.getTitle() != 'title']
@@ -203,7 +203,7 @@ class Recommender:
         publisherList = []
 
         for book in self.book_dict.values():
-            if book.getPages() not in ['pages', ""]:
+            if book.getPages() not in ['num_pages', ""]:
                 pageList.append(int(book.getPages()))
 
             currAuthors = book.getAuthors()
