@@ -13,7 +13,7 @@ class RecommenderGUI:
         self.main_window.geometry("1200x800")
         self.notebook = ttk.Notebook(self.main_window)
 
-        # MOVIE TAB
+        #region MOVIE TAB
         self.movieTab = ttk.Frame(self.main_window)
         self.notebook.add(self.movieTab, text="Movies")
 
@@ -46,8 +46,9 @@ class RecommenderGUI:
 
         self.bottomMovieStatText.insert(1.0, "No Movie Stats Loaded\n")
         self.bottomMovieStatText.config(state=tk.DISABLED)
+        #endregion
         
-        # TV SHOW TAB
+        #region TV SHOW TAB
         self.tvShowTab = ttk.Frame(self.main_window)
         self.notebook.add(self.tvShowTab, text="TV Shows")
 
@@ -80,8 +81,9 @@ class RecommenderGUI:
 
         self.bottomTVShowStatText.insert(1.0, "No TV Show Stats Loaded\n")
         self.bottomTVShowStatText.config(state=tk.DISABLED)
+        #endregion
 
-        # BOOK TAB
+        #region BOOK TAB
         self.bookTab = ttk.Frame(self.main_window)
         self.notebook.add(self.bookTab, text="Books")
 
@@ -114,22 +116,151 @@ class RecommenderGUI:
 
         self.bottomBookStatText.insert(1.0, "No Book Stats Loaded\n")
         self.bottomBookStatText.config(state=tk.DISABLED)
+        #endregion
+        
+        #region SEARCH MOVIES/TV TAB
+        self.searchMoviesTab = ttk.Frame(self.main_window)
+        self.notebook.add(self.searchMoviesTab, text="Search Movies/TV")
+        
+        self.searchMoviesTopFrame = ttk.Frame(self.searchMoviesTab)
+        self.searchMoviesTopFrame.grid(row=0, column=0, sticky="nesw")
+        self.searchMoviesTab.grid_rowconfigure(0, weight=0)
+        self.searchMoviesTab.grid_rowconfigure(1, weight=1)
+        self.searchMoviesTab.grid_columnconfigure(0, weight=1)
+        
+        self.typeLabel = ttk.Label(self.searchMoviesTopFrame, text="Type:")
+        self.typeCombobox = ttk.Combobox(self.searchMoviesTopFrame, values=["TV Show", "Movie"])
+        self.typeCombobox.current(0)
+        self.typeLabel.grid(row=0, column=0, sticky="W")
+        self.typeCombobox.grid(row=0, column=1, sticky="W")
+        
+        self.titleLabel = ttk.Label(self.searchMoviesTopFrame, text="Title:")
+        self.titleEntry = ttk.Entry(self.searchMoviesTopFrame)
+        self.titleLabel.grid(row=1, column=0, sticky="W")
+        self.titleEntry.grid(row=1, column=1, sticky="W")
 
-        # SEARCH MOVIES/TV TAB
-        self.searchTVmovies = ttk.Frame(self.main_window)
-        self.notebook.add(self.searchTVmovies, text="Search Movies/TV")
+        self.directorLabel = ttk.Label(self.searchMoviesTopFrame, text="Director:")
+        self.directorEntry = ttk.Entry(self.searchMoviesTopFrame)
+        self.directorLabel.grid(row=2, column=0, sticky="W")
+        self.directorEntry.grid(row=2, column=1, sticky="W")
 
+        self.actorLabel = ttk.Label(self.searchMoviesTopFrame, text="Actor:")
+        self.actorEntry = ttk.Entry(self.searchMoviesTopFrame)
+        self.actorLabel.grid(row=3, column=0, sticky="W")
+        self.actorEntry.grid(row=3, column=1, sticky="W")
 
-        # SEARCH BOOKS TAB
-        self.bookSearch = ttk.Frame(self.main_window)
-        self.notebook.add(self.bookSearch, text="Search Books")
+        self.genreLabel = ttk.Label(self.searchMoviesTopFrame, text="Genre:")
+        self.genreEntry = ttk.Entry(self.searchMoviesTopFrame)
+        self.genreLabel.grid(row=4, column=0, sticky="W")
+        self.genreEntry.grid(row=4, column=1, sticky="W")
+        
+        self.searchMovieButton = ttk.Button(self.searchMoviesTopFrame, text="Search", command=self.searchShows)
+        self.searchMovieButton.grid(row=5, column=0, sticky="W")
+        
+        # Search results frame
+        self.resultsFrame = ttk.Frame(self.searchMoviesTab)
+        self.resultsFrame.grid(row=1, column=0, sticky="nsew")
+        self.resultsFrame.grid_columnconfigure(0, weight=1)
+        self.resultsFrame.grid_rowconfigure(0, weight=1)
+        
+        # Search Results Scrollbar
+        self.resultsScrollbar = tk.Scrollbar(self.resultsFrame)
+        self.resultsScrollbar.grid(row=0, column=1, sticky='ns')
 
+        # Search results textbox
+        self.resultsText = tk.Text(self.resultsFrame, yscrollcommand=self.resultsScrollbar.set)
+        self.resultsText.grid(row=0, column=0, sticky='nsew')
+        
+        # Configure the scrollbar
+        self.resultsScrollbar.config(command=self.resultsText.yview)
+        #endregion
 
-        # RECOMMENDATIONS TAB
-        self.reccomendation = ttk.Frame(self.main_window)
-        self.notebook.add(self.reccomendation, text="Recommendations")
+        #region SEARCH BOOKS TAB
+        self.searchBookTab = ttk.Frame(self.main_window)
+        self.notebook.add(self.searchBookTab, text="Search Books")
+        
+        self.searchBookTopFrame = ttk.Frame(self.searchBookTab)
+        self.searchBookTopFrame.grid(row=0, column=0, sticky="nesw")
+        self.searchBookTab.grid_rowconfigure(0, weight=0)
+        self.searchBookTab.grid_rowconfigure(1, weight=1)
+        self.searchBookTab.grid_columnconfigure(0, weight=1)
+        
+        self.bookTitleLabel = ttk.Label(self.searchBookTopFrame, text="Title:")
+        self.bookTitleEntry = ttk.Entry(self.searchBookTopFrame)
+        self.bookTitleLabel.grid(row=0, column=0, sticky="W")
+        self.bookTitleEntry.grid(row=0, column=1, sticky="W")
 
+        self.bookAuthorLabel = ttk.Label(self.searchBookTopFrame, text="Author:")
+        self.bookAuthorEntry = ttk.Entry(self.searchBookTopFrame)
+        self.bookAuthorLabel.grid(row=1, column=0, sticky="W")
+        self.bookAuthorEntry.grid(row=1, column=1, sticky="W")
 
+        self.bookPublisherLabel = ttk.Label(self.searchBookTopFrame, text="Publisher:")
+        self.bookPublisherEntry = ttk.Entry(self.searchBookTopFrame)
+        self.bookPublisherLabel.grid(row=2, column=0, sticky="W")
+        self.bookPublisherEntry.grid(row=2, column=1, sticky="W")
+        
+        self.searchBookButton = ttk.Button(self.searchBookTopFrame, text="Search", command=self.searchBooks)
+        self.searchBookButton.grid(row=5, column=0, sticky="W")
+        
+        self.bookResultsFrame = ttk.Frame(self.searchBookTab)
+        self.bookResultsFrame.grid(row=1, column=0, sticky="nsew")
+        self.bookResultsFrame.grid_columnconfigure(0, weight=1)
+        self.bookResultsFrame.grid_rowconfigure(0, weight=1)
+        
+        # Search Results Scrollbar
+        self.bookResultsScrollbar = tk.Scrollbar(self.bookResultsFrame)
+        self.bookResultsScrollbar.grid(row=0, column=1, sticky='ns')
+
+        # Search results textbox
+        self.bookResultsText = tk.Text(self.bookResultsFrame, yscrollcommand=self.bookResultsScrollbar.set)
+        self.bookResultsText.grid(row=0, column=0, sticky='nsew')
+        
+        # Configure the scrollbar
+        self.bookResultsScrollbar.config(command=self.bookResultsText.yview)
+        #endregion
+
+        #region RECOMMENDATIONS TAB
+        self.recommendationTab = ttk.Frame(self.main_window)
+        self.notebook.add(self.recommendationTab, text="Recommendations")
+
+        self.recommendationsFrame = ttk.Frame(self.recommendationTab)
+        self.recommendationsFrame.grid(row=0, column=0, sticky="nesw")
+        self.recommendationTab.grid_rowconfigure(0, weight=0)
+        self.recommendationTab.grid_rowconfigure(1, weight=1)
+        self.recommendationTab.grid_columnconfigure(0, weight=1)
+        
+        self.recommendationTypeLabel = ttk.Label(self.recommendationsFrame, text="Type:")
+        self.recommendationTypeCombobox = ttk.Combobox(self.recommendationsFrame, values=["TV Show", "Movie", "Book"])
+        self.recommendationTypeCombobox.current(0)
+        self.recommendationTypeLabel.grid(row=0, column=0, sticky="W")
+        self.recommendationTypeCombobox.grid(row=0, column=1, sticky="W")
+        
+        self.recommendationTitleLabel = ttk.Label(self.recommendationsFrame, text="Title:")
+        self.recommendationTitleEntry = ttk.Entry(self.recommendationsFrame)
+        self.recommendationTitleLabel.grid(row=1, column=0, sticky="W")
+        self.recommendationTitleEntry.grid(row=1, column=1, sticky="W")
+        
+        self.getRecommendationButton = ttk.Button(self.recommendationsFrame, text="Get Recommendation",command=self.getRecommendations)
+        self.getRecommendationButton.grid(row=5, column=0, sticky="W")
+        
+        self.recommendationResultsFrame = ttk.Frame(self.recommendationTab)
+        self.recommendationResultsFrame.grid(row=1, column=0, sticky="nsew")
+        self.recommendationResultsFrame.grid_columnconfigure(0, weight=1)
+        self.recommendationResultsFrame.grid_rowconfigure(0, weight=1)
+        
+        # Recommendations Scrollbar
+        self.recommendationsResultsScrollbar = ttk.Scrollbar(self.recommendationResultsFrame)
+        self.recommendationsResultsScrollbar.grid(row=0, column=1, sticky='ns')
+
+        # Recommendations textbox
+        self.recommendationsResultsTextbox = tk.Text(self.recommendationResultsFrame, yscrollcommand=self.recommendationsResultsScrollbar.set)
+        self.recommendationsResultsTextbox.grid(row=0, column=0, sticky='nsew')
+        
+        # Configure the scrollbar
+        self.recommendationsResultsScrollbar.config(command=self.recommendationsResultsTextbox.yview)
+        #endregion
+        
         # BUTTONS
         self.buttonFrame = ttk.Frame(self.main_window)
         self.buttonFrame.pack(side='bottom', fill='x')
@@ -238,7 +369,7 @@ class RecommenderGUI:
         self.bottomBookStatText.config(state=tk.DISABLED)
     
     def loadAssociations(self):
-        # TODO
+        self.recc.loadAssociations()
         return
     
     def creditInfoBox(self):
@@ -246,15 +377,85 @@ class RecommenderGUI:
         tk.messagebox.showinfo("Information", "Bishawjit Saha and Sparsh Oza \nThis project was completed 05/04/2024")
 
     def searchShows(self):
-        # TODO
+        types = ["TV Show", "Movie"]
+        
+        searchType = types[self.typeCombobox.current()]
+        searchTitle = self.titleEntry.get()
+        searchDirector = self.directorEntry.get()
+        searchActor = self.actorEntry.get()
+        searchGenre = self.genreEntry.get()
+        
+        searchResult = self.recc.searchTVMovies(searchType, searchTitle, searchDirector, searchActor, searchGenre)
+        
+        
+        titleLen = max(len(item['title']) for item in searchResult)
+        directorLen = max(len("\\".join(item["director"])) for item in searchResult)
+        actorLen = max(len("\\".join(item["actor"])) for item in searchResult)
+        genreLen = max(len("\\".join(item["genre"])) for item in searchResult)
+        
+        # Check each value
+        if directorLen == 0 or directorLen is None:
+            directorLen = 10
+        
+        self.resultsText.insert(1.0, f"{'Title':<{titleLen}} {'Director':<{directorLen}} {'Actor':<{actorLen}} {'Genre':<{genreLen}}\n")
+        for item in searchResult:
+            title = item["title"]
+            director = "\\".join(item["director"])
+            actor = "\\".join(item["actor"])
+            genre = "\\".join(item["genre"])
+            
+            self.resultsText.insert(tk.END, f"{title:<{titleLen}} {director:<{directorLen}} {actor:<{actorLen}} {genre:<{genreLen}}\n")
         return
     
     def searchBooks(self):
-        # TODO
+        searchTitle = self.bookTitleEntry.get()
+        searchAuthor = self.bookAuthorEntry.get()
+        searchPublisher = self.bookPublisherEntry.get()
+        
+        searchResult = self.recc.searchBooks(searchTitle, searchAuthor, searchPublisher)
+        
+        titleLen = max(len(item["title"]) for item in searchResult)
+        authorLen = max(len("\\".join(item["author"])) for item in searchResult)
+        publisherLen = max(len(item["publisher"]) for item in searchResult)
+        
+        self.bookResultsText.insert(1.0, f"{'Title':<{titleLen}} {'Author':<{authorLen}} {'Publisher':<{publisherLen}}\n")
+        for item in searchResult:
+            title = item["title"]
+            author = "\\".join(item["author"])
+            publisher = item["publisher"]
+            
+            self.bookResultsText.insert(tk.END, f"{title:<{titleLen}} {author:<{authorLen}} {publisher:<{publisherLen}}\n")
         return
     
     def getRecommendations(self):
-        # TODO
+        types = ["TV Show", "Movie", "Book"]
+        
+        recType = types[self.recommendationTypeCombobox.current()]
+        recTitle = self.recommendationTitleEntry.get()
+        
+        recResult = self.recc.getRecommendations(recType, recTitle)
+        for item in recResult:
+            self.recommendationsResultsTextbox.insert(tk.END, "Title:\n")
+            self.recommendationsResultsTextbox.insert(tk.END, f"{item['Title']}\n")
+            self.recommendationsResultsTextbox.insert(tk.END, "Author:\n")
+            self.recommendationsResultsTextbox.insert(tk.END, f"{'\\'.join(item['Author'])}\n")
+            self.recommendationsResultsTextbox.insert(tk.END, "Average Rating:\n")
+            self.recommendationsResultsTextbox.insert(tk.END, f"{item['Average Rating']}\n")
+            self.recommendationsResultsTextbox.insert(tk.END, "ISBN:\n")
+            self.recommendationsResultsTextbox.insert(tk.END, f"{item['ISBN']}\n")
+            self.recommendationsResultsTextbox.insert(tk.END, "ISBN13:\n")
+            self.recommendationsResultsTextbox.insert(tk.END, f"{item['ISBN13']}\n")
+            self.recommendationsResultsTextbox.insert(tk.END, "Language Code:\n")
+            self.recommendationsResultsTextbox.insert(tk.END, f"{item['Language Code']}\n")
+            self.recommendationsResultsTextbox.insert(tk.END, "Pages:\n")
+            self.recommendationsResultsTextbox.insert(tk.END, f"{item['Pages']}\n")
+            self.recommendationsResultsTextbox.insert(tk.END, "Rating Count:\n")
+            self.recommendationsResultsTextbox.insert(tk.END, f"{item['Rating Count']}\n")
+            self.recommendationsResultsTextbox.insert(tk.END, "Publication Date:\n")
+            self.recommendationsResultsTextbox.insert(tk.END, f"{item['Publication Date']}\n")
+            self.recommendationsResultsTextbox.insert(tk.END, "Publisher:\n")
+            self.recommendationsResultsTextbox.insert(tk.END, f"{item['Publisher']}\n")
+            self.recommendationsResultsTextbox.insert(tk.END, "\n*************************\n\n")
         return
 
 if __name__ == "__main__":
