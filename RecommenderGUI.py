@@ -1,5 +1,8 @@
 # Description:
 
+import os
+from matplotlib import pyplot as plt
+from matplotlib.figure import Figure
 import Recommender
 import tkinter as tk
 from tkinter import ttk
@@ -261,6 +264,23 @@ class RecommenderGUI:
         self.recommendationsResultsScrollbar.config(command=self.recommendationsResultsTextbox.yview)
         #endregion
         
+        #region BONUS - RATINGS
+        self.ratingsTab = ttk.Frame(self.main_window)
+        self.notebook.add(self.ratingsTab, text="Ratings")
+
+        self.ratingsFrame = ttk.Frame(self.ratingsTab)
+        self.ratingsFrame.grid(row=0, column=0, sticky="nesw")
+        self.ratingsTab.grid_rowconfigure(0, weight=1)  # Make the frame expand with the tab
+        self.ratingsTab.grid_columnconfigure(0, weight=1)
+
+        self.generateChartsButton = ttk.Button(self.ratingsFrame, text="Generate Charts", command=self.generate_and_display_charts)
+        self.generateChartsButton.grid(row=0, column=0, pady=20, padx=20, sticky="n")  # Place button at the top, center it
+
+        # Set grid weights to make the frame expand
+        self.ratingsFrame.grid_rowconfigure(1, weight=1)  # This makes the space below the button expand
+        self.ratingsFrame.grid_columnconfigure(0, weight=1)
+        #endregion
+        
         # BUTTONS
         self.buttonFrame = ttk.Frame(self.main_window)
         self.buttonFrame.pack(side='bottom', fill='x')
@@ -283,6 +303,57 @@ class RecommenderGUI:
         self.notebook.pack(expand=1, fill="both")
 
         self.main_window.mainloop()
+
+    def generate_and_display_charts(self):
+        # Clear the frame content except the button
+        for widget in self.ratingsFrame.winfo_children():
+            if widget != self.generateChartsButton:
+                widget.destroy()
+
+        # Get data
+        movie_ratings = self.recc.getMovieRatings()
+        tv_show_ratings = self.recc.getTVRatings()
+
+        # Create pie charts
+        movie_chart_path = self.create_pie_chart(movie_ratings, "Movie Ratings")
+        tv_chart_path = self.create_pie_chart(tv_show_ratings, "TV Show Ratings")
+
+        # Display pie charts on Canvas
+        self.display_chart_on_canvas(movie_chart_path, self.ratingsFrame, row=1, column=0)
+        self.display_chart_on_canvas(tv_chart_path, self.ratingsFrame, row=1, column=1)
+
+    def create_pie_chart(self, data, title):
+        labels = list(data.keys())
+        sizes = list(data.values())
+        fig = Figure(figsize=(3.5, 3.5))
+        ax = fig.add_subplot(111)
+        ax.pie(sizes, labels=labels, autopct='%1.0f%%', startangle=90, textprops={"fontsize": 6})
+        ax.set_title(title, fontsize=12, verticalalignment='bottom')
+
+        # Adjust layout to make room for the title and prevent clipping
+        fig.subplots_adjust(top=0.85)
+        fig.tight_layout(rect=[0, 0, 1, 0.95])
+        
+        # Save the figure to a temporary path
+        temp_path = f"temp_{title.replace(' ', '_').lower()}.png"
+        fig.savefig(temp_path, bbox_inches='tight')
+        plt.close(fig)  # Close the figure to free memory
+        return temp_path
+    
+    def display_chart_on_canvas(self, image_path, frame, row, column):
+        canvas_width = 350
+        canvas_height = 350
+        canvas = tk.Canvas(frame, width=canvas_width, height=canvas_height)
+        canvas.grid(row=row, column=column, sticky="nsew")
+        frame.grid_rowconfigure(row, weight=1)
+        frame.grid_columnconfigure(column, weight=1)
+
+        tk_img = tk.PhotoImage(file=image_path)
+        canvas.create_image(canvas_width / 2, canvas_height / 2, image=tk_img)
+        canvas.image = tk_img  # Keep a reference!
+
+        # Optionally remove the image file after displaying
+        os.remove(image_path)
 
     def loadShows(self):
         self.recc.loadShows()
@@ -379,19 +450,19 @@ class RecommenderGUI:
     def searchShows(self):
         # searches for TV shows or movies based on the user's input in the GUI.
         # populates the resultsText textbox with the title, director, actor, and genre of each item found in the search results.
-        self.resultsText.delete(1.0, tk.END)
         types = ["TV Show", "Movie"]
         searchType = types[self.typeCombobox.current()]
         searchTitle = self.titleEntry.get()
         searchDirector = self.directorEntry.get()
         searchActor = self.actorEntry.get()
         searchGenre = self.genreEntry.get()
-        searchResult = self.recc.searchTVMovies(searchType, searchTitle, searchDirector, searchActor, searchGenre)   
-        #len of each item for frame width
+        self.resultsText.delete(1.0, tk.END)
+        searchResult = self.recc.searchTVMovies(searchType, searchTitle, searchDirector, searchActor, searchGenre)
         titleLen = max(len(item['title']) for item in searchResult)
         directorLen = max(len("\\".join(item["director"])) for item in searchResult)
         actorLen = max(len("\\".join(item["actor"])) for item in searchResult)
         genreLen = max(len("\\".join(item["genre"])) for item in searchResult)
+
         # Check each value
         if directorLen == 0 or directorLen is None:
             directorLen = 10
@@ -402,19 +473,18 @@ class RecommenderGUI:
             director = "\\".join(item["director"])
             actor = "\\".join(item["actor"])
             genre = "\\".join(item["genre"])
+            
             self.resultsText.insert(tk.END, f"{title:<{titleLen}} {director:<{directorLen}} {actor:<{actorLen}} {genre:<{genreLen}}\n")
         return
     
-    def searchBooks(self):
+    def searchBooks(self):        
         # retrieves books based on the title, author, and publisher entered in the GUI
         # populates the bookResultsText with the details of each book found in the search results
-        self.bookResultsText.delete(1.0,tk.END)
         searchTitle = self.bookTitleEntry.get()
         searchAuthor = self.bookAuthorEntry.get()
         searchPublisher = self.bookPublisherEntry.get()
-        
+        self.bookResultsText.delete(1.0, tk.END)
         searchResult = self.recc.searchBooks(searchTitle, searchAuthor, searchPublisher)
-        
         titleLen = max(len(item["title"]) for item in searchResult)
         authorLen = max(len("\\".join(item["author"])) for item in searchResult)
         publisherLen = max(len(item["publisher"]) for item in searchResult)
@@ -431,12 +501,10 @@ class RecommenderGUI:
     def getRecommendations(self):
         #retrieves recommendations based on the selected type and title from the GUI
         #populates the recommendationsResultsTextbox with the details of each recommended item.
-        self.recommendationsResultsTextbox.delete(1.0,tk.END)
+        self.recommendationsResultsTextbox.delete(1.0, tk.END)
         types = ["TV Show", "Movie", "Book"]
-        
         recType = types[self.recommendationTypeCombobox.current()]
         recTitle = self.recommendationTitleEntry.get()
-        
         recResult = self.recc.getRecommendations(recType, recTitle)
         for item in recResult:
             self.recommendationsResultsTextbox.insert(tk.END, "Title:\n")

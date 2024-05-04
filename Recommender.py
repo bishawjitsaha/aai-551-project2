@@ -86,6 +86,39 @@ class Recommender:
         # print(longest_title_length, bookList)
         return longest_title_length, bookList
     
+    def getMovieRatings(self):
+        movieList = [movie for movie in self.show_dict.values() if movie.getType() == 'Movie']
+        totalRatingList = []
+        
+        for movie in movieList:
+            if movie.getRating() not in ['rating']:
+                if movie.getRating() == '':
+                    movie.setRating('None')
+                totalRatingList.append(movie.getRating())
+                
+        return self.count_ratings(totalRatingList)
+    
+    def getTVRatings(self):
+        tvShowList = [movie for movie in self.show_dict.values() if movie.getType() == 'TV Show']
+        totalRatingList = []
+
+        for tvShow in tvShowList:
+            if tvShow.getRating() not in ['rating']:
+                if tvShow.getRating() == '':
+                    tvShow.setRating('None')
+                totalRatingList.append(tvShow.getRating())
+        
+        return self.count_ratings(totalRatingList)
+
+    def count_ratings(self, ratings_list):
+        ratings_count = {}
+        for rating in ratings_list:
+            if rating in ratings_count:
+                ratings_count[rating] += 1
+            else:
+                ratings_count[rating] = 1
+        return ratings_count
+
     def getMovieStats(self):
         movieList = [movie for movie in self.show_dict.values() if movie.getType() == 'Movie']
         totalRatingList = []
