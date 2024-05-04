@@ -377,22 +377,21 @@ class RecommenderGUI:
         tk.messagebox.showinfo("Information", "Bishawjit Saha and Sparsh Oza \nThis project was completed 05/04/2024")
 
     def searchShows(self):
+        # searches for TV shows or movies based on the user's input in the GUI.
+        # populates the resultsText textbox with the title, director, actor, and genre of each item found in the search results.
+        self.resultsText.delete(1.0, tk.END)
         types = ["TV Show", "Movie"]
-        
         searchType = types[self.typeCombobox.current()]
         searchTitle = self.titleEntry.get()
         searchDirector = self.directorEntry.get()
         searchActor = self.actorEntry.get()
         searchGenre = self.genreEntry.get()
-        
-        searchResult = self.recc.searchTVMovies(searchType, searchTitle, searchDirector, searchActor, searchGenre)
-        
-        
+        searchResult = self.recc.searchTVMovies(searchType, searchTitle, searchDirector, searchActor, searchGenre)   
+        #len of each item for frame width
         titleLen = max(len(item['title']) for item in searchResult)
         directorLen = max(len("\\".join(item["director"])) for item in searchResult)
         actorLen = max(len("\\".join(item["actor"])) for item in searchResult)
         genreLen = max(len("\\".join(item["genre"])) for item in searchResult)
-        
         # Check each value
         if directorLen == 0 or directorLen is None:
             directorLen = 10
@@ -403,11 +402,13 @@ class RecommenderGUI:
             director = "\\".join(item["director"])
             actor = "\\".join(item["actor"])
             genre = "\\".join(item["genre"])
-            
             self.resultsText.insert(tk.END, f"{title:<{titleLen}} {director:<{directorLen}} {actor:<{actorLen}} {genre:<{genreLen}}\n")
         return
     
     def searchBooks(self):
+        # retrieves books based on the title, author, and publisher entered in the GUI
+        # populates the bookResultsText with the details of each book found in the search results
+        self.bookResultsText.delete(1.0,tk.END)
         searchTitle = self.bookTitleEntry.get()
         searchAuthor = self.bookAuthorEntry.get()
         searchPublisher = self.bookPublisherEntry.get()
@@ -428,6 +429,9 @@ class RecommenderGUI:
         return
     
     def getRecommendations(self):
+        #retrieves recommendations based on the selected type and title from the GUI
+        #populates the recommendationsResultsTextbox with the details of each recommended item.
+        self.recommendationsResultsTextbox.delete(1.0,tk.END)
         types = ["TV Show", "Movie", "Book"]
         
         recType = types[self.recommendationTypeCombobox.current()]
