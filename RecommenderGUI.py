@@ -487,7 +487,7 @@ class RecommenderGUI:
     
     def creditInfoBox(self):
         # return a showinfo messagebox with information about the program
-        tk.messagebox.showinfo("Information", "Bishawjit Saha and Sparsh Oza \nThis project was completed 05/04/2024")
+        tk.messagebox.showinfo("Information", "Bishawjit Saha and Sparsh Oza \nThis project was completed 05/04/2024\nhttps://github.com/bishawjitsaha/aai-551-project2")
 
     def searchShows(self):
         # searches for TV shows or movies based on the user's input in the GUI.
