@@ -1,4 +1,6 @@
-# Description:
+# Description: This file is a simple class object for Media.
+# It tracks ID, title, and average rating.
+# It has the appropiate getters and setters for each attribute.
 
 class Media:
     def __init__(self, id, title, avg_rating):

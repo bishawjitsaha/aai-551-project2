@@ -1,4 +1,7 @@
-# Description: 
+# Description: This file is a class object for Show.
+# It tracks ID, title, type, directors, actors, average rating, country code, 
+# date added, year released, rating, duration, genres, and description.
+# It has the appropiate getters and setters for each attribute.
 
 from Media import Media
 

@@ -1,4 +1,7 @@
-# Description: 
+# Description: This file is a class object for Book.
+# It tracks ID, title, authors, average rating, ISBN, ISBN13, language,
+# pages, rating count, publication, and publisher.
+# It has the appropiate getters and setters for each attribute.
 
 from Media import Media
 

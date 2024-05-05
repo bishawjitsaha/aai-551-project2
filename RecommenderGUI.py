@@ -1,4 +1,7 @@
-# Description:
+# Description: This file is a GUI for the Media Recommender project.
+# It allows the user to load shows, books, and recommendations.
+# It also allows the user to search for shows, books, and get recommendations.
+# EXTRA CREDIT: It also allows the user to generate charts for the ratings of movies and TV shows.
 
 import os
 from matplotlib import pyplot as plt
@@ -9,6 +12,9 @@ from tkinter import ttk
 
 class RecommenderGUI:
     def __init__(self):
+        """ 
+        Initializes the GUI and the Recommender object.
+        """
         self.recc = Recommender.Recommender()
 
         self.main_window = tk.Tk()
@@ -159,6 +165,7 @@ class RecommenderGUI:
         
         self.searchMovieButton = ttk.Button(self.searchMoviesTopFrame, text="Search", command=self.searchShows)
         self.searchMovieButton.grid(row=5, column=0, sticky="W")
+
         
         # Search results frame
         self.resultsFrame = ttk.Frame(self.searchMoviesTab)
@@ -173,6 +180,9 @@ class RecommenderGUI:
         # Search results textbox
         self.resultsText = tk.Text(self.resultsFrame, yscrollcommand=self.resultsScrollbar.set)
         self.resultsText.grid(row=0, column=0, sticky='nsew')
+        
+        self.resultsText.insert(1.0, "No Search Results\n")
+        self.resultsText.config(state=tk.DISABLED)
         
         # Configure the scrollbar
         self.resultsScrollbar.config(command=self.resultsText.yview)
@@ -218,6 +228,9 @@ class RecommenderGUI:
         # Search results textbox
         self.bookResultsText = tk.Text(self.bookResultsFrame, yscrollcommand=self.bookResultsScrollbar.set)
         self.bookResultsText.grid(row=0, column=0, sticky='nsew')
+
+        self.bookResultsText.insert(1.0, "No Search Results\n")
+        self.bookResultsText.config(state=tk.DISABLED)
         
         # Configure the scrollbar
         self.bookResultsScrollbar.config(command=self.bookResultsText.yview)
@@ -259,6 +272,9 @@ class RecommenderGUI:
         # Recommendations textbox
         self.recommendationsResultsTextbox = tk.Text(self.recommendationResultsFrame, yscrollcommand=self.recommendationsResultsScrollbar.set)
         self.recommendationsResultsTextbox.grid(row=0, column=0, sticky='nsew')
+
+        self.recommendationsResultsTextbox.insert(1.0, "No Recommendations\n")
+        self.recommendationsResultsTextbox.config(state=tk.DISABLED)
         
         # Configure the scrollbar
         self.recommendationsResultsScrollbar.config(command=self.recommendationsResultsTextbox.yview)
@@ -306,21 +322,24 @@ class RecommenderGUI:
 
     def generate_and_display_charts(self):
         # Clear the frame content except the button
-        for widget in self.ratingsFrame.winfo_children():
-            if widget != self.generateChartsButton:
-                widget.destroy()
+        try: 
+            for widget in self.ratingsFrame.winfo_children():
+                if widget != self.generateChartsButton:
+                    widget.destroy()
 
-        # Get data
-        movie_ratings = self.recc.getMovieRatings()
-        tv_show_ratings = self.recc.getTVRatings()
+            # Get data
+            movie_ratings = self.recc.getMovieRatings()
+            tv_show_ratings = self.recc.getTVRatings()
 
-        # Create pie charts
-        movie_chart_path = self.create_pie_chart(movie_ratings, "Movie Ratings")
-        tv_chart_path = self.create_pie_chart(tv_show_ratings, "TV Show Ratings")
+            # Create pie charts
+            movie_chart_path = self.create_pie_chart(movie_ratings, "Movie Ratings")
+            tv_chart_path = self.create_pie_chart(tv_show_ratings, "TV Show Ratings")
 
-        # Display pie charts on Canvas
-        self.display_chart_on_canvas(movie_chart_path, self.ratingsFrame, row=1, column=0)
-        self.display_chart_on_canvas(tv_chart_path, self.ratingsFrame, row=1, column=1)
+            # Display pie charts on Canvas
+            self.display_chart_on_canvas(movie_chart_path, self.ratingsFrame, row=1, column=0)
+            self.display_chart_on_canvas(tv_chart_path, self.ratingsFrame, row=1, column=1)
+        except Exception as e:
+            self.displayError(e)
 
     def create_pie_chart(self, data, title):
         labels = list(data.keys())
@@ -356,91 +375,114 @@ class RecommenderGUI:
         os.remove(image_path)
 
     def loadShows(self):
-        self.recc.loadShows()
+        """
+        This function displays the shows and their statistics in the GUI.
+        """
+        try: 
+            self.recc.loadShows()
 
-        # MOVIES
-        self.topMoiveText.config(state=tk.NORMAL)
-        self.topMoiveText.delete(1.0, tk.END)
+            # MOVIES
+            self.topMoiveText.config(state=tk.NORMAL)
+            self.topMoiveText.delete(1.0, tk.END)
 
-        movieTitleLen, movieList = self.recc.getMovieList()
-        movieTitles = [movieList[i]["title"] for i in range(len(movieList))]
-        movieRuntime = [movieList[i]["runtime"] for i in range(len(movieList))]
+            movieTitleLen, movieList = self.recc.getMovieList()
+            movieTitles = [movieList[i]["title"] for i in range(len(movieList))]
+            movieRuntime = [movieList[i]["runtime"] for i in range(len(movieList))]
 
-        self.topMoiveText.insert(1.0, f"{'Title':<{movieTitleLen}} Runtime\n")
-        for i in range(len(movieTitles)):
-            self.topMoiveText.insert(tk.END, f"{movieTitles[i]:<{movieTitleLen}} {movieRuntime[i]}\n")
-        self.topMoiveText.config(state=tk.DISABLED)
+            self.topMoiveText.insert(1.0, f"{'Title':<{movieTitleLen}} Runtime\n")
+            for i in range(len(movieTitles)):
+                self.topMoiveText.insert(tk.END, f"{movieTitles[i]:<{movieTitleLen}} {movieRuntime[i]}\n")
+            self.topMoiveText.config(state=tk.DISABLED)
 
-        ratingPercentages, avgDuration, most_common_directors, most_common_actors, most_common_genres = self.recc.getMovieStats()
+            ratingPercentages, avgDuration, most_common_directors, most_common_actors, most_common_genres = self.recc.getMovieStats()
 
-        self.bottomMovieStatText.config(state=tk.NORMAL)
-        self.bottomMovieStatText.delete(1.0, tk.END)
+            self.bottomMovieStatText.config(state=tk.NORMAL)
+            self.bottomMovieStatText.delete(1.0, tk.END)
 
-        self.bottomMovieStatText.insert(1.0, "Ratings: \n")
-        for rating in ratingPercentages:
-            self.bottomMovieStatText.insert(tk.END, rating + "\n")
+            self.bottomMovieStatText.insert(1.0, "Ratings: \n")
+            for rating in ratingPercentages:
+                self.bottomMovieStatText.insert(tk.END, rating + "\n")
+            
+            self.bottomMovieStatText.insert(tk.END, f"\nAverage Movie Duration: {avgDuration} \n")
+            self.bottomMovieStatText.insert(tk.END, f"\nMost Common Director: {most_common_directors} \n")
+            self.bottomMovieStatText.insert(tk.END, f"\nMost Common Actor: {most_common_actors} \n")
+            self.bottomMovieStatText.insert(tk.END, f"\nMost Frequent Genre: {most_common_genres} \n")
+            self.bottomMovieStatText.config(state=tk.DISABLED)      
+
+
+            # TV SHOWS
+            self.topTVShowText.config(state=tk.NORMAL)
+            self.topTVShowText.delete(1.0, tk.END)
+            
+            tvShowTitleLen, tvShowList = self.recc.getTVList()
+            tvShowTitles = [tvShowList[i]["title"] for i in range(len(tvShowList))]
+            tvShowSeasons = [tvShowList[i]["seasons"] for i in range(len(tvShowList))]
+
+            self.topTVShowText.insert(1.0, f"{'Title':<{tvShowTitleLen}} Seasons\n")
+            for i in range(len(tvShowTitles)):
+                self.topTVShowText.insert(tk.END, f"{tvShowTitles[i]:<{tvShowTitleLen}} {tvShowSeasons[i]}\n")
+            self.topTVShowText.config(state=tk.DISABLED)
+
+            ratingPercentages, avgDuration, most_common_actors, most_common_genres = self.recc.getTVStats()
+
+            self.bottomTVShowStatText.config(state=tk.NORMAL)
+            self.bottomTVShowStatText.delete(1.0, tk.END)
+
+            self.bottomTVShowStatText.insert(1.0, "Ratings: \n")
+            for rating in ratingPercentages:
+                self.bottomTVShowStatText.insert(tk.END, rating + "\n")
+
+            self.bottomTVShowStatText.insert(tk.END, f"\nAverage TV Show Duration: {avgDuration} \n")
+            self.bottomTVShowStatText.insert(tk.END, f"\nMost Common Actor: {most_common_actors} \n")
+            self.bottomTVShowStatText.insert(tk.END, f"\nMost Frequent Genre: {most_common_genres} \n")
+            self.bottomTVShowStatText.config(state=tk.DISABLED)
+
+        except Exception as e:
+            self.displayError(e)
+            self.loadShows()
         
-        self.bottomMovieStatText.insert(tk.END, f"\nAverage Movie Duration: {avgDuration} \n")
-        self.bottomMovieStatText.insert(tk.END, f"\nMost Common Director: {most_common_directors} \n")
-        self.bottomMovieStatText.insert(tk.END, f"\nMost Common Actor: {most_common_actors} \n")
-        self.bottomMovieStatText.insert(tk.END, f"\nMost Frequent Genre: {most_common_genres} \n")
-        self.bottomMovieStatText.config(state=tk.DISABLED)
-
-
-        # TV SHOWS
-        self.topTVShowText.config(state=tk.NORMAL)
-        self.topTVShowText.delete(1.0, tk.END)
-        
-        tvShowTitleLen, tvShowList = self.recc.getTVList()
-        tvShowTitles = [tvShowList[i]["title"] for i in range(len(tvShowList))]
-        tvShowSeasons = [tvShowList[i]["seasons"] for i in range(len(tvShowList))]
-
-        self.topTVShowText.insert(1.0, f"{'Title':<{tvShowTitleLen}} Seasons\n")
-        for i in range(len(tvShowTitles)):
-            self.topTVShowText.insert(tk.END, f"{tvShowTitles[i]:<{tvShowTitleLen}} {tvShowSeasons[i]}\n")
-        self.topTVShowText.config(state=tk.DISABLED)
-
-        ratingPercentages, avgDuration, most_common_actors, most_common_genres = self.recc.getTVStats()
-
-        self.bottomTVShowStatText.config(state=tk.NORMAL)
-        self.bottomTVShowStatText.delete(1.0, tk.END)
-
-        self.bottomTVShowStatText.insert(1.0, "Ratings: \n")
-        for rating in ratingPercentages:
-            self.bottomTVShowStatText.insert(tk.END, rating + "\n")
-
-        self.bottomTVShowStatText.insert(tk.END, f"\nAverage TV Show Duration: {avgDuration} \n")
-        self.bottomTVShowStatText.insert(tk.END, f"\nMost Common Actor: {most_common_actors} \n")
-        self.bottomTVShowStatText.insert(tk.END, f"\nMost Frequent Genre: {most_common_genres} \n")
-        self.bottomTVShowStatText.config(state=tk.DISABLED)
 
     def loadBooks(self):
-        self.recc.loadBooks()
+        """
+        This function displays the books and their statistics in the GUI.
+        """
+        try:
+            self.recc.loadBooks()
 
-        self.topBookText.config(state=tk.NORMAL)
-        self.topBookText.delete(1.0, tk.END)
-        
-        bookTitleLen, bookList = self.recc.getBookList()
-        bookTitles = [bookList[i]["title"] for i in range(len(bookList))]
-        bookAuthors = [bookList[i]["authors"] for i in range(len(bookList))]
+            self.topBookText.config(state=tk.NORMAL)
+            self.topBookText.delete(1.0, tk.END)
+            
+            bookTitleLen, bookList = self.recc.getBookList()
+            bookTitles = [bookList[i]["title"] for i in range(len(bookList))]
+            bookAuthors = [bookList[i]["authors"] for i in range(len(bookList))]
 
-        self.topBookText.insert(1.0, f"{'Title':<{bookTitleLen}} Author(s)\n")
-        for i in range(len(bookTitles)):
-            self.topBookText.insert(tk.END, f"{bookTitles[i]:<{bookTitleLen}} {bookAuthors[i]}\n")
-        self.topBookText.config(state=tk.DISABLED)
+            self.topBookText.insert(1.0, f"{'Title':<{bookTitleLen}} Author(s)\n")
+            for i in range(len(bookTitles)):
+                self.topBookText.insert(tk.END, f"{bookTitles[i]:<{bookTitleLen}} {bookAuthors[i]}\n")
+            self.topBookText.config(state=tk.DISABLED)
 
-        avgPages, most_common_authors, most_common_publishers = self.recc.getBookStats()
+            avgPages, most_common_authors, most_common_publishers = self.recc.getBookStats()
 
-        self.bottomBookStatText.config(state=tk.NORMAL)
-        self.bottomBookStatText.delete(1.0, tk.END)
+            self.bottomBookStatText.config(state=tk.NORMAL)
+            self.bottomBookStatText.delete(1.0, tk.END)
 
-        self.bottomBookStatText.insert(tk.END, f"\nAverage Page Count: {avgPages} \n")
-        self.bottomBookStatText.insert(tk.END, f"\nMost Profilic Author: {most_common_authors} \n")
-        self.bottomBookStatText.insert(tk.END, f"\nMost Profilic Publisher: {most_common_publishers} \n")
-        self.bottomBookStatText.config(state=tk.DISABLED)
+            self.bottomBookStatText.insert(tk.END, f"\nAverage Page Count: {avgPages} \n")
+            self.bottomBookStatText.insert(tk.END, f"\nMost Profilic Author: {most_common_authors} \n")
+            self.bottomBookStatText.insert(tk.END, f"\nMost Profilic Publisher: {most_common_publishers} \n")
+            self.bottomBookStatText.config(state=tk.DISABLED)
+        except Exception as e:
+            self.displayError(e)
+            self.loadBooks()
     
     def loadAssociations(self):
-        self.recc.loadAssociations()
+        """
+        This function loads the associations between the shows, books, and recommendations.
+        """
+        try:
+            self.recc.loadAssociations()
+        except Exception as e:
+            self.displayError(e)
+            self.loadAssociations()
         return
     
     def creditInfoBox(self):
@@ -450,85 +492,129 @@ class RecommenderGUI:
     def searchShows(self):
         # searches for TV shows or movies based on the user's input in the GUI.
         # populates the resultsText textbox with the title, director, actor, and genre of each item found in the search results.
-        types = ["TV Show", "Movie"]
-        searchType = types[self.typeCombobox.current()]
-        searchTitle = self.titleEntry.get()
-        searchDirector = self.directorEntry.get()
-        searchActor = self.actorEntry.get()
-        searchGenre = self.genreEntry.get()
-        self.resultsText.delete(1.0, tk.END)
-        searchResult = self.recc.searchTVMovies(searchType, searchTitle, searchDirector, searchActor, searchGenre)
-        titleLen = max(len(item['title']) for item in searchResult)
-        directorLen = max(len("\\".join(item["director"])) for item in searchResult)
-        actorLen = max(len("\\".join(item["actor"])) for item in searchResult)
-        genreLen = max(len("\\".join(item["genre"])) for item in searchResult)
+        try: 
+            types = ["TV Show", "Movie"]
+            searchType = types[self.typeCombobox.current()]
+            searchTitle = self.titleEntry.get()
+            searchDirector = self.directorEntry.get()
+            searchActor = self.actorEntry.get()
+            searchGenre = self.genreEntry.get()
+            self.resultsText.delete(1.0, tk.END)
+            searchResult = self.recc.searchTVMovies(searchType, searchTitle, searchDirector, searchActor, searchGenre)
 
-        # Check each value
-        if directorLen == 0 or directorLen is None:
-            directorLen = 10
-        
-        self.resultsText.insert(1.0, f"{'Title':<{titleLen}} {'Director':<{directorLen}} {'Actor':<{actorLen}} {'Genre':<{genreLen}}\n")
-        for item in searchResult:
-            title = item["title"]
-            director = "\\".join(item["director"])
-            actor = "\\".join(item["actor"])
-            genre = "\\".join(item["genre"])
+            if searchResult == []:
+                self.resultsText.insert(1.0, "No Results Found\n")
+                self.resultsText.config(state=tk.DISABLED)
+                return
+
+            self.resultsText.config(state=tk.NORMAL)
+            self.resultsText.delete(1.0, tk.END)
+
+            titleLen = max(len(item['title']) for item in searchResult)
+            directorLen = max(len("\\".join(item["director"])) for item in searchResult)
+            actorLen = max(len("\\".join(item["actor"])) for item in searchResult)
+
+            # Check each value
+            if directorLen == 0 or directorLen is None:
+                directorLen = 10
             
-            self.resultsText.insert(tk.END, f"{title:<{titleLen}} {director:<{directorLen}} {actor:<{actorLen}} {genre:<{genreLen}}\n")
+            
+            self.resultsText.insert(1.0, f"{'Title':<{titleLen}} {'Director':<{directorLen}} {'Actor':<{actorLen}} {'Genre'}\n")
+            for item in searchResult:
+                title = item["title"]
+                director = "\\".join(item["director"])
+                actor = "\\".join(item["actor"])
+                genre = "\\".join(item["genre"])
+                self.resultsText.insert(tk.END, f"{title:<{titleLen}} {director:<{directorLen}} {actor:<{actorLen}} {genre}\n")
+            self.resultsText.config(state=tk.DISABLED)
+        except Exception as e:
+            self.displayError(e)
         return
     
     def searchBooks(self):        
         # retrieves books based on the title, author, and publisher entered in the GUI
         # populates the bookResultsText with the details of each book found in the search results
-        searchTitle = self.bookTitleEntry.get()
-        searchAuthor = self.bookAuthorEntry.get()
-        searchPublisher = self.bookPublisherEntry.get()
-        self.bookResultsText.delete(1.0, tk.END)
-        searchResult = self.recc.searchBooks(searchTitle, searchAuthor, searchPublisher)
-        titleLen = max(len(item["title"]) for item in searchResult)
-        authorLen = max(len("\\".join(item["author"])) for item in searchResult)
-        publisherLen = max(len(item["publisher"]) for item in searchResult)
-        
-        self.bookResultsText.insert(1.0, f"{'Title':<{titleLen}} {'Author':<{authorLen}} {'Publisher':<{publisherLen}}\n")
-        for item in searchResult:
-            title = item["title"]
-            author = "\\".join(item["author"])
-            publisher = item["publisher"]
+        try:
+            searchTitle = self.bookTitleEntry.get()
+            searchAuthor = self.bookAuthorEntry.get()
+            searchPublisher = self.bookPublisherEntry.get()
+            self.bookResultsText.delete(1.0, tk.END)
+            searchResult = self.recc.searchBooks(searchTitle, searchAuthor, searchPublisher)
             
-            self.bookResultsText.insert(tk.END, f"{title:<{titleLen}} {author:<{authorLen}} {publisher:<{publisherLen}}\n")
+            if searchResult == []:
+                self.bookResultsText.insert(1.0, "No Results Found\n")
+                self.bookResultsText.config(state=tk.DISABLED)
+                return
+            
+            self.bookResultsText.config(state=tk.NORMAL)
+            self.bookResultsText.delete(1.0, tk.END)
+            
+            titleLen = max(len(item["title"]) for item in searchResult)
+            authorLen = max(len("\\".join(item["author"])) for item in searchResult)
+
+            
+            self.bookResultsText.insert(1.0, f"{'Title':<{titleLen}} {'Author':<{authorLen}} {'Publisher'}\n")
+            for item in searchResult:
+                title = item["title"]
+                author = "\\".join(item["author"])
+                publisher = item["publisher"]
+                
+                self.bookResultsText.insert(tk.END, f"{title:<{titleLen}} {author:<{authorLen}} {publisher}\n")
+            self.bookResultsText.config(state=tk.DISABLED)
+        except Exception as e:
+            self.displayError(e)
         return
     
     def getRecommendations(self):
         #retrieves recommendations based on the selected type and title from the GUI
         #populates the recommendationsResultsTextbox with the details of each recommended item.
-        self.recommendationsResultsTextbox.delete(1.0, tk.END)
-        types = ["TV Show", "Movie", "Book"]
-        recType = types[self.recommendationTypeCombobox.current()]
-        recTitle = self.recommendationTitleEntry.get()
-        recResult = self.recc.getRecommendations(recType, recTitle)
-        for item in recResult:
-            self.recommendationsResultsTextbox.insert(tk.END, "Title:\n")
-            self.recommendationsResultsTextbox.insert(tk.END, f"{item['Title']}\n")
-            self.recommendationsResultsTextbox.insert(tk.END, "Author:\n")
-            self.recommendationsResultsTextbox.insert(tk.END, f"{'\\'.join(item['Author'])}\n")
-            self.recommendationsResultsTextbox.insert(tk.END, "Average Rating:\n")
-            self.recommendationsResultsTextbox.insert(tk.END, f"{item['Average Rating']}\n")
-            self.recommendationsResultsTextbox.insert(tk.END, "ISBN:\n")
-            self.recommendationsResultsTextbox.insert(tk.END, f"{item['ISBN']}\n")
-            self.recommendationsResultsTextbox.insert(tk.END, "ISBN13:\n")
-            self.recommendationsResultsTextbox.insert(tk.END, f"{item['ISBN13']}\n")
-            self.recommendationsResultsTextbox.insert(tk.END, "Language Code:\n")
-            self.recommendationsResultsTextbox.insert(tk.END, f"{item['Language Code']}\n")
-            self.recommendationsResultsTextbox.insert(tk.END, "Pages:\n")
-            self.recommendationsResultsTextbox.insert(tk.END, f"{item['Pages']}\n")
-            self.recommendationsResultsTextbox.insert(tk.END, "Rating Count:\n")
-            self.recommendationsResultsTextbox.insert(tk.END, f"{item['Rating Count']}\n")
-            self.recommendationsResultsTextbox.insert(tk.END, "Publication Date:\n")
-            self.recommendationsResultsTextbox.insert(tk.END, f"{item['Publication Date']}\n")
-            self.recommendationsResultsTextbox.insert(tk.END, "Publisher:\n")
-            self.recommendationsResultsTextbox.insert(tk.END, f"{item['Publisher']}\n")
-            self.recommendationsResultsTextbox.insert(tk.END, "\n*************************\n\n")
+        try:
+            types = ["TV Show", "Movie", "Book"]
+            recType = types[self.recommendationTypeCombobox.current()]
+            recTitle = self.recommendationTitleEntry.get()
+            recResult = self.recc.getRecommendations(recType, recTitle)
+
+            if recResult == []:
+                self.recommendationsResultsTextbox.insert(1.0, "No Recommendations Found\n")
+                self.recommendationsResultsTextbox.config(state=tk.DISABLED)
+                return
+            
+            self.recommendationsResultsTextbox.config(state=tk.NORMAL)
+            self.recommendationsResultsTextbox.delete(1.0, tk.END)
+
+            for item in recResult:
+                self.recommendationsResultsTextbox.insert(tk.END, "Title:\n")
+                self.recommendationsResultsTextbox.insert(tk.END, f"{item['Title']}\n")
+                self.recommendationsResultsTextbox.insert(tk.END, "Author:\n")
+                self.recommendationsResultsTextbox.insert(tk.END, f"{'\\'.join(item['Author'])}\n")
+                self.recommendationsResultsTextbox.insert(tk.END, "Average Rating:\n")
+                self.recommendationsResultsTextbox.insert(tk.END, f"{item['Average Rating']}\n")
+                self.recommendationsResultsTextbox.insert(tk.END, "ISBN:\n")
+                self.recommendationsResultsTextbox.insert(tk.END, f"{item['ISBN']}\n")
+                self.recommendationsResultsTextbox.insert(tk.END, "ISBN13:\n")
+                self.recommendationsResultsTextbox.insert(tk.END, f"{item['ISBN13']}\n")
+                self.recommendationsResultsTextbox.insert(tk.END, "Language Code:\n")
+                self.recommendationsResultsTextbox.insert(tk.END, f"{item['Language Code']}\n")
+                self.recommendationsResultsTextbox.insert(tk.END, "Pages:\n")
+                self.recommendationsResultsTextbox.insert(tk.END, f"{item['Pages']}\n")
+                self.recommendationsResultsTextbox.insert(tk.END, "Rating Count:\n")
+                self.recommendationsResultsTextbox.insert(tk.END, f"{item['Rating Count']}\n")
+                self.recommendationsResultsTextbox.insert(tk.END, "Publication Date:\n")
+                self.recommendationsResultsTextbox.insert(tk.END, f"{item['Publication Date']}\n")
+                self.recommendationsResultsTextbox.insert(tk.END, "Publisher:\n")
+                self.recommendationsResultsTextbox.insert(tk.END, f"{item['Publisher']}\n")
+                self.recommendationsResultsTextbox.insert(tk.END, "\n*************************\n\n")
+            
+            self.recommendationsResultsTextbox.config(state=tk.DISABLED)
+        except Exception as e:
+            self.displayError(e)
         return
+    
+    def displayError(self, error):
+        """
+        This function displays an error message in a messagebox.
+        """
+        tk.messagebox.showerror("Error", error)
 
 if __name__ == "__main__":
     app = RecommenderGUI()
